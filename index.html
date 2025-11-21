@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QUIMI TEST - Plataforma Educativa</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <!-- Iconos -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-image: url('Fondo Quimi Test.jpg'); /* Imagen de fondo solicitada */
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            min-height: 100vh;
+        }
+        
+        /* Capa oscura para mejorar legibilidad sobre el fondo */
+        .overlay {
+            background-color: rgba(17, 24, 39, 0.85); /* Azul oscuro/Negro con transparencia */
+            min-height: 100vh;
+            backdrop-filter: blur(3px);
+        }
+
+        /* Animaciones */
+        .fade-in { animation: fadeIn 0.5s ease-in-out; }
+        .slide-up { animation: slideUp 0.5s ease-out; }
+        
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        /* Estilo del Timer */
+        .timer-bar { transition: width 1s linear; }
+        
+        /* Scrollbar personalizada */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(255,255,255,0.1); }
+        ::-webkit-scrollbar-thumb { background: #4F46E5; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #4338ca; }
+
+        /* Clases utilitarias para contenido teórico */
+        .theory-content h3 { font-size: 1.5rem; font-weight: 700; color: #4F46E5; margin-top: 1.5rem; margin-bottom: 0.5rem; }
+        .theory-content p { margin-bottom: 1rem; line-height: 1.7; color: #374151; text-align: justify; }
+        .theory-content ul { list-style-type: disc; padding-left: 1.5rem; margin-bottom: 1rem; }
+        .theory-content li { margin-bottom: 0.5rem; color: #4B5563; }
+        .theory-content strong { color: #111827; font-weight: 600; }
+        .theory-box { background: #F9FAFB; padding: 1.5rem; border-left: 4px solid #4F46E5; border-radius: 0.5rem; margin: 1rem 0; }
+    </style>
+</head>
+<body class="text-gray-800">
+    <div class="overlay flex flex-col min-h-screen">
+        
+        <!-- Navbar (Visible solo si logueado) -->
+        <nav id="navbar" class="hidden bg-white/10 backdrop-blur-md border-b border-white/20 text-white p-4 sticky top-0 z-50">
+            <div class="container mx-auto flex justify-between items-center">
+                <div class="flex items-center gap-3 cursor-pointer" onclick="app.navigate('dashboard')">
+                    <div class="bg-indigo-600 p-2 rounded-lg">
+                        <i data-lucide="flask-conical" class="w-6 h-6 text-white"></i>
+                    </div>
+                    <h1 class="text-2xl font-bold tracking-wide">QUIMI TEST</h1>
+                </div>
+                <div class="flex items-center gap-4">
+                    <span id="user-display" class="font-medium text-indigo-200">Usuario</span>
+                    <button onclick="app.logout()" class="bg-red-500/80 hover:bg-red-600 px-4 py-2 rounded-lg text-sm font-semibold transition shadow-lg flex items-center gap-2">
+                        <i data-lucide="log-out" class="w-4 h-4"></i> Salir
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Contenedor Principal -->
+        <main id="app-container" class="container mx-auto px-4 py-8 flex-grow flex flex-col justify-center">
+            <!-- Las vistas se inyectarán aquí con JS -->
+        </main>
+
+        <!-- Footer -->
+        <footer class="text-center text-gray-400 text-sm py-4 border-t border-white/10 mt-auto">
+            <p>© 2025 QUIMI TEST by Mikaela Myshel Alexander</p>
+        </footer>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // --- DATA STORE ---
+        const DB = {
+            topics: [
+                {
+                    id: 1,
+                    title: "Factores de Conversión",
+                    image: "Factores de conversion.png",
+                    desc: "Domina las equivalencias entre unidades de longitud, masa, tiempo y más.",
+                    theory: `
+                        <div class="theory-content">
+                            <p>Un <strong>factor de conversión</strong> es una operación matemática utilizada para realizar cambios en unidades de la misma magnitud o para calcular la equivalencia entre múltiplos y submúltiplos.</p>
+                            
+                            <div class="theory-box">
+                                <strong>Regla Fundamental:</strong> Se basa en multiplicar por una fracción que vale la unidad (1), donde el numerador y el denominador representan la misma cantidad pero en diferentes unidades.
+                            </div>
+
+                            <h3>Magnitudes Fundamentales y Derivadas</h3>
+                            <p>En química y física, es crucial entender las magnitudes. Las fundamentales incluyen longitud, masa, tiempo, temperatura, cantidad de sustancia, corriente eléctrica e intensidad luminosa.</p>
+
+                            <h3>Tablas de Equivalencias Comunes</h3>
+                            <div class="grid md:grid-cols-2 gap-4 my-4">
+                                <div class="bg-white p-4 rounded shadow-sm">
+                                    <h4 class="font-bold text-indigo-600 mb-2">Longitud</h4>
+                                    <ul class="text-sm">
+                                        <li>1 km = 1000 m</li>
+                                        <li>1 m = 100 cm = 1000 mm</li>
+                                        <li>1 pulgada (in) = 2.54 cm</li>
+                                        <li>1 pie (ft) = 12 in = 30.48 cm</li>
+                                        <li>1 milla = 1609 m</li>
+                                    </ul>
+                                </div>
+                                <div class="bg-white p-4 rounded shadow-sm">
+                                    <h4 class="font-bold text-indigo-600 mb-2">Masa</h4>
+                                    <ul class="text-sm">
+                                        <li>1 kg = 1000 g = 2.205 lb</li>
+                                        <li>1 lb = 453.6 g = 16 oz</li>
+                                        <li>1 tonelada métrica = 1000 kg</li>
+                                        <li>1 onza (oz) = 28.35 g</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <h3>Método del Factor Unitario</h3>
+                            <p>Para convertir unidades, escribimos la cantidad a convertir y la multiplicamos por una fracción (factor de conversión) tal que la unidad antigua se cancele y quede la nueva.</p>
+                            <p class="bg-gray-800 text-white p-3 rounded font-mono text-center my-2">
+                                50 km × (1000 m / 1 km) = 50,000 m
+                            </p>
+                            
+                            <h3>Aplicaciones</h3>
+                            <p>Los factores de conversión son vitales no solo en ciencia, sino en cambios monetarios, cocina, navegación y medicina para dosificación de fármacos.</p>
+                        </div>
+                    `,
+                    questions: [
+                        { q: "¿Cuántos metros hay en 1 kilómetro?", options: ["100 m", "1000 m", "10 m", "500 m"], ans: 1 },
+                        { q: "El símbolo 'kg' representa:", options: ["Kilogramo", "Kelvin", "Kilómetro", "Gramo"], ans: 1 },
+                        { q: "¿A cuánto equivale 1 pulgada en cm?", options: ["2.54 cm", "3.14 cm", "10 cm", "5.08 cm"], ans: 1 },
+                        { q: "Es una magnitud fundamental de tiempo:", options: ["Hora", "Minuto", "Segundo", "Día"], ans: 2 },
+                        { q: "¿Qué fracción se usa para convertir minutos a horas?", options: ["60 min / 1 h", "1 h / 60 min", "100 min / 1 h", "1 h / 100 min"], ans: 1 },
+                        { q: "¿Cuántos gramos tiene 1 kilogramo?", options: ["100 g", "1000 g", "10000 g", "10 g"], ans: 2 },
+                        { q: "¿Cuántas libras hay aproximadamente en 1 kg?", options: ["1 lb", "10 lbs", "2.205 lbs", "0.5 lbs"], ans: 3 },
+                        { q: "Para pasar de cm a m, se debe:", options: ["Multiplicar por 100", "Dividir entre 100", "Sumar 100", "Restar 100"], ans: 2 },
+                        { q: "¿Qué unidad no pertenece al Sistema Internacional?", options: ["Metro", "Segundo", "Pie", "Kilogramo"], ans: 2 }
+                    ]
+                },
+                {
+                    id: 2,
+                    title: "Densidades",
+                    image: "Densidad.png",
+                    desc: "Comprende la relación entre masa y volumen de la materia.",
+                    theory: `
+                        <div class="theory-content">
+                            <p>La <strong>densidad (ρ)</strong> es una propiedad intensiva de la materia que relaciona la cantidad de masa contenida en un determinado volumen.</p>
+                            
+                            <div class="theory-box text-center">
+                                <span class="text-2xl font-serif">ρ = m / v</span>
+                                <br>
+                                <span class="text-sm text-gray-500">Donde ρ es densidad, m es masa, v es volumen.</span>
+                            </div>
+
+                            <h3>Conceptos Clave</h3>
+                            <ul class="list-disc pl-5">
+                                <li><strong>Propiedad Intensiva:</strong> No depende de la cantidad de materia. Una gota de agua tiene la misma densidad que un lago lleno de agua pura.</li>
+                                <li><strong>Unidades:</strong> En el SI es kg/m³, pero en durante el curso prefacultativo es muy común usar g/cm³ o g/mL.</li>
+                                <li><strong>Densidad del Agua:</strong> La densidad del agua es 1 g/cm³.</li>
+                            </ul>
+
+                            <h3>Densidad Relativa (Gravedad Específica)</h3>
+                            <p>Es la relación entre la densidad de una sustancia y la densidad de una sustancia de referencia (generalmente agua para líquidos/sólidos y aire para gases). Es una cantidad adimensional (sin unidades).</p>
+
+                            <h3>Principio de Arquímedes</h3>
+                            <p>Un objeto flotará en un fluido si su densidad es menor que la del fluido. Si es mayor, se hundirá. Esto explica por qué el hielo (menos denso) flota en el agua y por qué los barcos de acero flotan (debido al volumen de aire desplazado).</p>
+
+                            <h3>Factores que Afectan la Densidad</h3>
+                            <p>La temperatura afecta el volumen. Generalmente, al aumentar la temperatura, el volumen aumenta (dilatación) y, por tanto, la densidad disminuye.</p>
+                        </div>
+                    `,
+                    questions: [
+                        { q: "¿Cuál es la fórmula de la densidad?", options: ["D = v/m", "D = m/v", "D = m x v", "D = m + v"], ans: 2 },
+                        { q: "Si un objeto tiene mucha masa en poco volumen, su densidad es:", options: ["Baja", "Alta", "Nula", "Invariable"], ans: 2 },
+                        { q: "¿Cuál es la densidad aproximada del agua?", options: ["1 g/cm³", "10 g/cm³", "0.5 g/cm³", "100 g/cm³"], ans: 1 },
+                        { q: "Si la densidad de un objeto es menor que la del agua:", options: ["Se hunde", "Flota", "Se disuelve", "Explota"], ans: 1 },
+                        { q: "La unidad de densidad en el S.I. es:", options: ["g/L", "kg/m³", "lb/ft³", "mg/mL"], ans: 1 },
+                        { q: "¿Qué pasa con la densidad de un gas si comprimimos su volumen?", options: ["Aumenta", "Disminuye", "Se mantiene igual", "Desaparece"], ans: 0 },
+                        { q: "La densidad es una propiedad:", options: ["Extensiva", "Intensiva", "Química", "Nuclear"], ans: 1 },
+                        { q: "1 mL es equivalente a:", options: ["1 cm³", "1 m³", "1 L", "1 mm³"], ans: 0 },
+                        { q: "¿Qué instrumento mide la densidad de líquidos?", options: ["Termómetro", "Barómetro", "Densímetro", "Voltímetro"], ans: 2 },
+                        { q: "El aceite flota sobre el agua porque:", options: ["Es más denso", "Es menos denso", "Tienen igual densidad", "Es apolar"], ans: 1 }
+                    ]
+                },
+                {
+                    id: 3,
+                    title: "Temperaturas",
+                    image: "Temperatura.jpg",
+                    desc: "Escalas termométricas: Celsius, Fahrenheit y Kelvin.",
+                    theory: `
+                        <div class="theory-content">
+                            <p>La <strong>temperatura</strong> es una magnitud física que indica la energía interna de un cuerpo, o más específicamente, la energía cinética promedio de las partículas que lo componen.</p>
+                            
+                            <h3>Escalas Termométricas</h3>
+                            <p>Existen tres escalas principales utilizadas en la ciencia y la vida cotidiana:</p>
+
+                            <div class="grid gap-4 mt-4">
+                                <div class="bg-blue-50 p-4 rounded border-l-4 border-blue-500">
+                                    <h4 class="font-bold text-blue-800">Escala Celsius (°C)</h4>
+                                    <p class="text-sm">Basada en el agua: 0°C es el punto de congelación y 100°C el de ebullición a 1 atm. Es la escala más usada en el mundo.</p>
+                                </div>
+                                <div class="bg-orange-50 p-4 rounded border-l-4 border-orange-500">
+                                    <h4 class="font-bold text-orange-800">Escala Kelvin (K)</h4>
+                                    <p class="text-sm">Es la escala absoluta usada en ciencia. No tiene valores negativos. 0 K es el "cero absoluto" (ausencia de movimiento molecular). K = °C + 273.15.</p>
+                                </div>
+                                <div class="bg-green-50 p-4 rounded border-l-4 border-green-500">
+                                    <h4 class="font-bold text-green-800">Escala Fahrenheit (°F)</h4>
+                                    <p class="text-sm">Usada principalmente en EE.UU. El agua se congela a 32°F y hierve a 212°F.</p>
+                                </div>
+                            </div>
+
+                            <h3>Fórmulas de Conversión</h3>
+                            <ul class="bg-gray-800 text-gray-100 p-4 rounded font-mono text-sm mt-4">
+                                <li class="mb-2">°C a K: K = °C + 273</li>
+                                <li class="mb-2">K a °C: °C = K - 273</li>
+                                <li class="mb-2">°C a °F: °F = (1.8 × °C) + 32</li>
+                                <li>°F a °C: °C = (°F - 32) / 1.8</li>
+                            </ul>
+
+                            <h3>Cero Absoluto</h3>
+                            <p>El cero absoluto (0 K o -273.15 °C) es el límite teórico inferior de temperatura. A esta temperatura, las partículas de una sustancia tienen la mínima energía cinética posible.</p>
+                        </div>
+                    `,
+                    questions: [
+                        { q: "¿Cuál es la escala absoluta de temperatura?", options: ["Celsius", "Fahrenheit", "Kelvin", "Rankine"], ans: 2 },
+                        { q: "¿A cuántos grados Celsius hierve el agua a nivel del mar?", options: ["90°C", "100°C", "120°C", "212°C"], ans: 1 },
+                        { q: "¿Cuál es el valor del cero absoluto en Celsius?", options: ["0°C", "-100°C", "-273.15°C", "-32°C"], ans: 2 },
+                        { q: "Fórmula para convertir Celsius a Kelvin:", options: ["K = °C + 273", "K = °C - 273", "K = 273 / °C", "K = 1.8 x °C"], ans: 0 },
+                        { q: "¿Qué temperatura marca el punto de congelación del agua en Fahrenheit?", options: ["0°F", "32°F", "100°F", "212°F"], ans: 1 },
+                        { q: "La temperatura mide:", options: ["Calor total", "Energía potencial", "Energía cinética promedio", "Masa molecular"], ans: 2 },
+                        { q: "Si estamos a 25°C, ¿cuánto es en Kelvin?", options: ["298 K", "248 K", "300 K", "25 K"], ans: 0 },
+                        { q: "¿Qué escala no utiliza el símbolo de grado (°)?", options: ["Celsius", "Kelvin", "Fahrenheit", "Todas lo usan"], ans: 1 },
+                        { q: "El cuerpo humano promedio está a unos:", options: ["20°C", "98°C", "37°C", "50°C"], ans: 2 },
+                        { q: "En la escala Fahrenheit el agua hierve a:", options: ["100°F", "180°F", "212°F", "373°F"], ans: 2 }
+                    ]
+                },
+                {
+                    id: 4,
+                    title: "Átomos y Moléculas",
+                    image: "Átomos.png",
+                    desc: "Explora la estructura fundamental de la materia.",
+                    theory: `
+                        <div class="theory-content">
+                            <p>El <strong>átomo</strong> es la unidad básica de la materia. Todo lo que vemos a nuestro alrededor está compuesto por átomos.</p>
+
+                            <h3>Estructura Atómica</h3>
+                            <p>El átomo consta de dos partes principales:</p>
+                            <ul class="list-disc pl-5">
+                                <li><strong>Núcleo:</strong> Pequeño, denso y con carga positiva. Contiene <strong>Protones</strong> (carga +) y <strong>Neutrones</strong> (sin carga). Concentra casi toda la masa.</li>
+                                <li><strong>Nube Electrónica (Corteza):</strong> Zona exterior donde orbitan los <strong>Electrones</strong> (carga -). Determina el volumen del átomo.</li>
+                            </ul>
+
+                            <h3>Teoría Atómica de Dalton (1808)</h3>
+                            <p>John Dalton propuso que la materia está formada por partículas indivisibles llamadas átomos, que los átomos de un mismo elemento son idénticos y que los compuestos se forman por la unión de átomos en proporciones sencillas.</p>
+
+                            <h3>Moléculas e Iones</h3>
+                            <p>Una <strong>molécula</strong> es un grupo eléctricamente neutro de dos o más átomos unidos por enlaces químicos. Un <strong>ion</strong> es un átomo o molécula con carga eléctrica (Catión +, Anión -).</p>
+
+                            <h3>Número Atómico (Z) y Másico (A)</h3>
+                            <p><strong>Z</strong> es el número de protones (define qué elemento es).<br>
+                            <strong>A</strong> es la suma de protones + neutrones.</p>
+                        </div>
+                    `,
+                    questions: [
+                        { q: "¿Qué partícula tiene carga negativa?", options: ["Protón", "Neutrón", "Electrón", "Fotón"], ans: 2 },
+                        { q: "¿Dónde se encuentra la mayor parte de la masa del átomo?", options: ["En los electrones", "En el núcleo", "En la corteza", "Es uniforme"], ans: 1 },
+                        { q: "El número atómico (Z) representa la cantidad de:", options: ["Neutrones", "Electrones", "Protones", "Átomos"], ans: 2 },
+                        { q: "¿Quién propuso la primera teoría atómica moderna?", options: ["Bohr", "Rutherford", "Dalton", "Einstein"], ans: 2 },
+                        { q: "Un átomo con carga positiva se llama:", options: ["Anión", "Catión", "Isótopo", "Neutrino"], ans: 1 },
+                        { q: "Los isótopos son átomos del mismo elemento con diferente número de:", options: ["Protones", "Neutrones", "Electrones", "Niveles"], ans: 1 },
+                        { q: "La unión de dos o más átomos forma una:", options: ["Célula", "Molécula", "Mezcla", "Solución"], ans: 1 },
+                        { q: "¿Qué carga tiene el neutrón?", options: ["Positiva", "Negativa", "Neutra", "Variable"], ans: 2 },
+                        { q: "El número de masa (A) es igual a:", options: ["Z + Neutrones", "Z + Electrones", "Protones + Electrones", "Solo Neutrones"], ans: 0 },
+                        { q: "¿Qué modelo atómico se conoce como 'budín de pasas'?", options: ["Dalton", "Thomson", "Rutherford", "Bohr"], ans: 1 }
+                    ]
+                },
+                {
+                    id: 5,
+                    title: "Números Cuánticos",
+                    image: "Números cuanticos.png",
+                    desc: "Entiende la distribución probabilística de los electrones.",
+                    theory: `
+                        <div class="theory-content">
+                            <p>Los <strong>números cuánticos</strong> describen el estado energético y la posición probable de un electrón en un átomo. Son la "dirección" del electrón.</p>
+
+                            <div class="bg-white rounded-lg shadow overflow-hidden my-4">
+                                <table class="min-w-full text-sm text-left text-gray-500">
+                                    <thead class="text-xs text-gray-700 uppercase bg-gray-100">
+                                        <tr>
+                                            <th class="px-4 py-2">Símbolo</th>
+                                            <th class="px-4 py-2">Nombre</th>
+                                            <th class="px-4 py-2">Indica</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr class="bg-white border-b">
+                                            <td class="px-4 py-2 font-bold">n</td>
+                                            <td class="px-4 py-2">Principal</td>
+                                            <td class="px-4 py-2">Nivel de energía y tamaño (1, 2, 3...)</td>
+                                        </tr>
+                                        <tr class="bg-gray-50 border-b">
+                                            <td class="px-4 py-2 font-bold">l</td>
+                                            <td class="px-4 py-2">Secundario (Azimutal)</td>
+                                            <td class="px-4 py-2">Subnivel y forma orbital (s, p, d, f)</td>
+                                        </tr>
+                                        <tr class="bg-white border-b">
+                                            <td class="px-4 py-2 font-bold">m (ml)</td>
+                                            <td class="px-4 py-2">Magnético</td>
+                                            <td class="px-4 py-2">Orientación espacial del orbital</td>
+                                        </tr>
+                                        <tr class="bg-gray-50">
+                                            <td class="px-4 py-2 font-bold">s (ms)</td>
+                                            <td class="px-4 py-2">Spin</td>
+                                            <td class="px-4 py-2">Giro del electrón (+1/2, -1/2)</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <h3>Subniveles de Energía</h3>
+                            <ul class="list-disc pl-5">
+                                <li><strong>s (sharp):</strong> l=0, forma esférica, máx 2 electrones.</li>
+                                <li><strong>p (principal):</strong> l=1, forma dilobular, máx 6 electrones.</li>
+                                <li><strong>d (diffuse):</strong> l=2, forma tetralobular, máx 10 electrones.</li>
+                                <li><strong>f (fundamental):</strong> l=3, forma compleja, máx 14 electrones.</li>
+                            </ul>
+
+                            <h3>Principio de Exclusión de Pauli</h3>
+                            <p>Dos electrones en un mismo átomo no pueden tener los cuatro números cuánticos iguales. Deben diferenciarse al menos en el spin.</p>
+                        </div>
+                    `,
+                    questions: [
+                        { q: "¿Cuántos números cuánticos describen a un electrón?", options: ["2", "3", "4", "5"], ans: 2 },
+                        { q: "El número cuántico principal 'n' indica:", options: ["La forma", "El nivel de energía", "El giro", "La orientación"], ans: 1 },
+                        { q: "¿Cuál es la forma del orbital 's'?", options: ["Esférica", "Bilobular", "Compleja", "Cúbica"], ans: 0 },
+                        { q: "¿Cuántos electrones caben como máximo en un subnivel 'p'?", options: ["2", "6", "10", "14"], ans: 1 },
+                        { q: "El número cuántico de spin 's' puede valer:", options: ["0, 1", "+1/2, -1/2", "1, 2, 3", "+1, -1"], ans: 1 },
+                        { q: "Si l=2, ¿de qué subnivel hablamos?", options: ["s", "p", "d", "f"], ans: 2 },
+                        { q: "El principio de exclusión de Pauli dice que:", options: ["Los electrones no giran", "Dos electrones no pueden tener los 4 números iguales", "El núcleo es neutro", "La energía se pierde"], ans: 1 },
+                        { q: "¿Cuántos orbitales tiene el subnivel 'd'?", options: ["1", "3", "5", "7"], ans: 2 },
+                        { q: "El número cuántico magnético 'm' indica:", options: ["El tamaño", "La energía", "La orientación espacial", "El giro"], ans: 2 },
+                        { q: "La capacidad máxima de electrones en el nivel n=1 es:", options: ["2", "8", "18", "32"], ans: 0 }
+                    ]
+                }
+            ]
+        };
+
+        // --- APP STATE MANAGEMENT ---
+        const app = {
+            user: null,
+            view: 'login',
+            currentTopicId: null,
+            quiz: {
+                questionIndex: 0,
+                score: 0,
+                timer: null,
+                timeLeft: 15,
+                answers: []
+            },
+
+            init() {
+                lucide.createIcons();
+                this.loadUser();
+                this.render();
+            },
+
+            loadUser() {
+                const saved = localStorage.getItem('quimiTestUser');
+                if (saved) {
+                    this.user = JSON.parse(saved);
+                    this.view = 'dashboard';
+                }
+            },
+
+            login(e) {
+                e.preventDefault();
+                const name = document.getElementById('name').value;
+                const email = document.getElementById('email').value;
+                if (name && email) {
+                    this.user = { name, email, scores: {} };
+                    localStorage.setItem('quimiTestUser', JSON.stringify(this.user));
+                    this.navigate('dashboard');
+                }
+            },
+
+            logout() {
+                this.user = null;
+                localStorage.removeItem('quimiTestUser');
+                this.navigate('login');
+            },
+
+            navigate(view, topicId = null) {
+                this.view = view;
+                this.currentTopicId = topicId;
+                this.render();
+            },
+
+            render() {
+                const container = document.getElementById('app-container');
+                const navbar = document.getElementById('navbar');
+                const userDisplay = document.getElementById('user-display');
+                
+                // Navbar Logic
+                if (this.view === 'login') {
+                    navbar.classList.add('hidden');
+                } else {
+                    navbar.classList.remove('hidden');
+                    userDisplay.textContent = `Hola, ${this.user.name.split(' ')[0]}`;
+                    lucide.createIcons();
+                }
+
+                // View Routing
+                switch(this.view) {
+                    case 'login':
+                        container.innerHTML = this.views.login();
+                        break;
+                    case 'dashboard':
+                        container.innerHTML = this.views.dashboard();
+                        break;
+                    case 'topic':
+                        container.innerHTML = this.views.topic(this.currentTopicId);
+                        break;
+                    case 'quiz':
+                        container.innerHTML = this.views.quiz();
+                        this.startQuizLogic();
+                        break;
+                    case 'result':
+                        container.innerHTML = this.views.result();
+                        break;
+                }
+                lucide.createIcons();
+            },
+
+            // --- VIEWS TEMPLATES ---
+            views: {
+                login: () => `
+                    <div class="max-w-md mx-auto w-full bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl overflow-hidden fade-in">
+                        <div class="bg-indigo-600 p-6 text-center">
+                            <h1 class="text-3xl font-extrabold text-white tracking-wider">QUIMI TEST ⚗️</h1>
+                            <p class="text-indigo-200 mt-2">Aprende Química jugando</p>
+                        </div>
+                        <div class="p-8">
+                            <form onsubmit="app.login(event)" class="space-y-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Nombre Completo</label>
+                                    <input type="text" id="name" required class="w-full px-4 py-2 rounded border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition" placeholder="Ej: María Pérez">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Correo Electrónico</label>
+                                    <input type="email" id="email" required class="w-full px-4 py-2 rounded border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition" placeholder="estudiante@ejemplo.com">
+                                </div>
+                                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-lg shadow-lg transition transform hover:-translate-y-1">
+                                    Comenzar Aventura
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                `,
+
+                dashboard: () => `
+                    <div class="fade-in w-full max-w-6xl">
+                        <h2 class="text-3xl font-bold text-white mb-8 text-center drop-shadow-md">Selecciona un Tema de Estudio</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            ${DB.topics.map(topic => {
+                                const lastScore = app.user.scores[topic.id] || 0;
+                                return `
+                                <div class="bg-white/90 backdrop-blur-sm rounded-xl shadow-xl overflow-hidden hover:shadow-2xl transition transform hover:-translate-y-2 cursor-pointer group" onclick="app.navigate('topic', ${topic.id})">
+                                    <div class="h-48 overflow-hidden relative">
+                                        <img src="${topic.image}" alt="${topic.title}" class="w-full h-full object-cover transition duration-500 group-hover:scale-110" onerror="this.src='https://placehold.co/600x400/4F46E5/white?text=Imagen+No+Encontrada'">
+                                        <div class="absolute top-0 right-0 bg-indigo-600 text-white text-xs font-bold px-3 py-1 rounded-bl-lg">
+                                            Mejor Nota: ${lastScore}/100
+                                        </div>
+                                    </div>
+                                    <div class="p-6">
+                                        <h3 class="text-xl font-bold text-gray-800 mb-2 group-hover:text-indigo-600 transition">${topic.title}</h3>
+                                        <p class="text-gray-600 text-sm mb-4 line-clamp-2">${topic.desc}</p>
+                                        <button class="w-full bg-indigo-100 text-indigo-700 font-semibold py-2 rounded-lg group-hover:bg-indigo-600 group-hover:text-white transition flex justify-center items-center gap-2">
+                                            <i data-lucide="book-open" class="w-4 h-4"></i> Estudiar
+                                        </button>
+                                    </div>
+                                </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                `,
+
+                topic: (id) => {
+                    const topic = DB.topics.find(t => t.id === id);
+                    return `
+                    <div class="bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl w-full max-w-4xl overflow-hidden slide-up flex flex-col h-[80vh]">
+                        <!-- Header Tema -->
+                        <div class="relative h-48 md:h-64 flex-shrink-0">
+                            <img src="${topic.image}" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/600x400?text=Imagen+No+Encontrada'">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex items-end p-6">
+                                <div>
+                                    <h2 class="text-3xl md:text-4xl font-bold text-white">${topic.title}</h2>
+                                </div>
+                            </div>
+                            <button onclick="app.navigate('dashboard')" class="absolute top-4 left-4 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full backdrop-blur transition">
+                                <i data-lucide="arrow-left" class="w-6 h-6"></i>
+                            </button>
+                        </div>
+
+                        <!-- Contenido Scrollable -->
+                        <div class="flex-grow overflow-y-auto p-6 md:p-8">
+                            ${topic.theory}
+                        </div>
+
+                        <!-- Footer Acción -->
+                        <div class="p-4 border-t bg-gray-50 flex justify-center flex-shrink-0 z-10">
+                            <button onclick="app.navigate('quiz', ${topic.id})" class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-lg font-bold py-3 px-12 rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition flex items-center gap-2">
+                                <i data-lucide="play-circle" class="w-6 h-6"></i> REALIZAR TEST
+                            </button>
+                        </div>
+                    </div>
+                    `;
+                },
+
+                quiz: () => {
+                    const topic = DB.topics.find(t => t.id === app.currentTopicId);
+                    const q = topic.questions[app.quiz.questionIndex];
+                    return `
+                    <div class="w-full max-w-2xl mx-auto">
+                        <!-- Barra de Progreso Superior -->
+                        <div class="bg-white rounded-xl shadow-lg p-4 mb-4 flex justify-between items-center">
+                            <div>
+                                <span class="text-xs font-bold text-gray-500 uppercase tracking-wide">Tema</span>
+                                <h3 class="font-bold text-indigo-600">${topic.title}</h3>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-xs font-bold text-gray-500 uppercase tracking-wide">Pregunta</span>
+                                <p class="font-bold text-gray-800">${app.quiz.questionIndex + 1} <span class="text-gray-400 text-sm">/ 10</span></p>
+                            </div>
+                        </div>
+
+                        <!-- Tarjeta de Pregunta -->
+                        <div class="bg-white rounded-2xl shadow-2xl overflow-hidden relative slide-up">
+                            <!-- Barra de Tiempo -->
+                            <div class="w-full h-2 bg-gray-200">
+                                <div id="timer-bar" class="h-full bg-indigo-500 timer-bar" style="width: 100%"></div>
+                            </div>
+                            
+                            <div class="p-8">
+                                <h3 class="text-xl md:text-2xl font-bold text-gray-800 mb-6 text-center">${q.q}</h3>
+                                
+                                <div class="grid gap-3">
+                                    ${q.options.map((opt, idx) => `
+                                        <button onclick="app.checkAnswer(${idx}, this)" class="option-btn text-left w-full p-4 rounded-xl border-2 border-gray-200 hover:border-indigo-500 hover:bg-indigo-50 transition font-medium text-gray-700 relative group">
+                                            <span class="bg-gray-200 text-gray-600 text-xs font-bold px-2 py-1 rounded mr-3 group-hover:bg-indigo-200 group-hover:text-indigo-700 transition">OPCIÓN ${String.fromCharCode(65+idx)}</span>
+                                            ${opt}
+                                        </button>
+                                    `).join('')}
+                                </div>
+                            </div>
+                            <div class="bg-gray-50 p-3 text-center text-xs text-gray-400">
+                                QUIMI TEST
+                            </div>
+                        </div>
+                    </div>
+                    `;
+                },
+
+                result: () => {
+                    const score = app.quiz.score;
+                    const percentage = Math.round(score); // Score is already 0-100
+                    let message = "";
+                    let color = "";
+                    let icon = "";
+
+                    if (percentage === 100) { message = "¡PERFECTO! Eres un genio."; color = "text-green-600"; icon = "trophy"; }
+                    else if (percentage >= 70) { message = "¡Muy Bien! Sigue así."; color = "text-blue-600"; icon = "thumbs-up"; }
+                    else { message = "Necesitas repasar un poco más."; color = "text-orange-600"; icon = "book-open"; }
+
+                    return `
+                    <div class="max-w-md mx-auto w-full bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl overflow-hidden text-center p-8 slide-up">
+                        <div class="mb-6 flex justify-center">
+                            <div class="bg-indigo-100 p-4 rounded-full">
+                                <i data-lucide="${icon}" class="w-16 h-16 ${color}"></i>
+                            </div>
+                        </div>
+                        
+                        <h2 class="text-4xl font-black text-gray-800 mb-2">${score} Pts</h2>
+                        <p class="text-xl font-medium ${color} mb-8">${message}</p>
+                        
+                        <div class="grid grid-cols-2 gap-4 mb-8">
+                            <div class="bg-gray-50 p-4 rounded-xl">
+                                <p class="text-xs text-gray-500 uppercase">Correctas</p>
+                                <p class="text-xl font-bold text-green-600">${app.quiz.answers.filter(a => a).length}</p>
+                            </div>
+                            <div class="bg-gray-50 p-4 rounded-xl">
+                                <p class="text-xs text-gray-500 uppercase">Incorrectas</p>
+                                <p class="text-xl font-bold text-red-500">${app.quiz.answers.filter(a => !a).length}</p>
+                            </div>
+                        </div>
+
+                        <div class="space-y-3">
+                            <button onclick="app.navigate('dashboard')" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-lg shadow transition">
+                                Volver al Menú
+                            </button>
+                            <button onclick="app.navigate('topic', ${app.currentTopicId})" class="w-full bg-white border-2 border-indigo-600 text-indigo-700 hover:bg-indigo-50 font-bold py-3 rounded-lg transition">
+                                Repasar Teoría
+                            </button>
+                        </div>
+                    </div>
+                    `;
+                }
+            },
+
+            // --- QUIZ LOGIC ---
+            startQuizLogic() {
+                this.quiz.questionIndex = 0;
+                this.quiz.score = 0;
+                this.quiz.answers = [];
+                this.nextQuestionLogic();
+            },
+
+            nextQuestionLogic() {
+                this.quiz.timeLeft = 15;
+                const timerBar = document.getElementById('timer-bar');
+                
+                // Reset styles if re-rendering
+                if(timerBar) {
+                    timerBar.style.transition = 'none';
+                    timerBar.style.width = '100%';
+                    setTimeout(() => {
+                        timerBar.style.transition = 'width 15s linear';
+                        timerBar.style.width = '0%';
+                    }, 100);
+                }
+
+                if (this.quiz.timer) clearInterval(this.quiz.timer);
+                
+                this.quiz.timer = setInterval(() => {
+                    this.quiz.timeLeft--;
+                    if (this.quiz.timeLeft <= 0) {
+                        this.timeUp();
+                    }
+                }, 1000);
+            },
+
+            timeUp() {
+                clearInterval(this.quiz.timer);
+                this.recordAnswer(false);
+            },
+
+            checkAnswer(selectedIndex, btnElement) {
+                clearInterval(this.quiz.timer);
+                const topic = DB.topics.find(t => t.id === this.currentTopicId);
+                const correctIndex = topic.questions[this.quiz.questionIndex].ans;
+                
+                const buttons = document.querySelectorAll('.option-btn');
+                buttons.forEach(btn => btn.disabled = true);
+
+                if (selectedIndex === correctIndex) {
+                    btnElement.classList.remove('border-gray-200', 'hover:border-indigo-500');
+                    btnElement.classList.add('bg-green-100', 'border-green-500', 'text-green-800');
+                    this.recordAnswer(true);
+                } else {
+                    btnElement.classList.remove('border-gray-200', 'hover:border-indigo-500');
+                    btnElement.classList.add('bg-red-100', 'border-red-500', 'text-red-800');
+                    // Highlight correct one
+                    buttons[correctIndex].classList.add('bg-green-100', 'border-green-500', 'text-green-800');
+                    this.recordAnswer(false);
+                }
+            },
+
+            recordAnswer(isCorrect) {
+                this.quiz.answers.push(isCorrect);
+                setTimeout(() => {
+                    this.quiz.questionIndex++;
+                    if (this.quiz.questionIndex < 10) {
+                        this.render(); // Re-render quiz view for next question
+                    } else {
+                        this.finishQuiz();
+                    }
+                }, 1500); // Wait 1.5s to show feedback
+            },
+
+            finishQuiz() {
+                // Calculate Score (10 questions, 100 points max)
+                const correctCount = this.quiz.answers.filter(a => a).length;
+                this.quiz.score = correctCount * 10;
+                
+                // Save high score
+                const currentTopicScores = this.user.scores[this.currentTopicId] || 0;
+                if (this.quiz.score > currentTopicScores) {
+                    this.user.scores[this.currentTopicId] = this.quiz.score;
+                    localStorage.setItem('quimiTestUser', JSON.stringify(this.user));
+                }
+
+                this.navigate('result');
+            }
+        };
+
+        // Start App
+        document.addEventListener('DOMContentLoaded', () => app.init());
+    </script>
+</body>
+</html>
